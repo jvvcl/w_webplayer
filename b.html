@@ -9,7 +9,7 @@
     #canvas{
         background-color: white;
         border-radius: 25px;
-    
+
     }
 </style>
 
@@ -39,12 +39,12 @@
     var margin = 100;
     var newWIDTH = (WIDTH - margin * 2);
     var rects=[];
-    rects.push({x:margin + newWIDTH / 5 * 0,y:HEIGHT/2,isDragging:false});
-    rects.push({x:margin + newWIDTH / 5 * 1,y:HEIGHT/2,isDragging:false});
-    rects.push({x:margin + newWIDTH / 5 * 2,y:HEIGHT/2,isDragging:false});
-    rects.push({x:margin + newWIDTH / 5 * 3,y:HEIGHT/2,isDragging:false});
-    rects.push({x:margin + newWIDTH / 5 * 4,y:HEIGHT/2,isDragging:false});
-    rects.push({x:margin + newWIDTH / 5 * 5,y:HEIGHT/2,isDragging:false});
+    rects.push({x:margin + newWIDTH / 5 * 0,y:HEIGHT/2,isDragging:false, isAwaying:false});
+    rects.push({x:margin + newWIDTH / 5 * 1,y:HEIGHT/2,isDragging:false, isAwaying:false});
+    rects.push({x:margin + newWIDTH / 5 * 2,y:HEIGHT/2,isDragging:false, isAwaying:false});
+    rects.push({x:margin + newWIDTH / 5 * 3,y:HEIGHT/2,isDragging:false, isAwaying:false});
+    rects.push({x:margin + newWIDTH / 5 * 4,y:HEIGHT/2,isDragging:false, isAwaying:false});
+    rects.push({x:margin + newWIDTH / 5 * 5,y:HEIGHT/2,isDragging:false, isAwaying:false});
 
     // listen for mouse events
     canvas.onmousedown = myDown;
@@ -93,6 +93,11 @@
             ctx.fillStyle= dragok && r.isDragging ? colorActive : !dragok ? colorActive : colorInactive;
             rect(r.x,r.y,radius);
         }
+
+        for(var i=0;i<rects.length;i++){
+          var r=rects[i];
+          ctx.fillText(r.y, r.x, r.y + 50);
+        }
     }
 
 
@@ -122,8 +127,9 @@
         if (!dragok){
             for (var i = 0; i < rects.length-1; i++){
                 if (mx > rects[i].x && mx <= rects[i+1].x){
-                    away(i);
-                    away(i+1);
+                    away(i, my);
+                    away(i+1, my);
+
                 }
             }
         }
@@ -131,25 +137,26 @@
         // save the current mouse position
         startX=mx;
         startY=my;
-    }
-
-    var id;
+      }
 
     function away(i, my){
         var r = rects[i];
-        if (my > r.y){
-            r.y -= (r.y - 50) / 20;
+
+        var ry = r.y;
+        if (my > ry){
+            r.y -= (ry - 50) / 20;
+            //r.y -= 5;
         }
         else{
-            r.y += (HEIGHT - 50 - r.y) / 100;
+            r.y += (HEIGHT - 50 - ry) / 20;
+            //r.y += 5;
         }
-        
-        draw();
-        if(r.y > 50 && r.y < HEIGHT - 50) requestAnimationFrame( function(){away(i, my)} );
-        else clearInterval(id);
-    }
 
-    id = setInterval(function(){away(i, my)}, 1000 / 60);
+        draw();
+        if(r.y > 51 && r.y < HEIGHT - 51) requestAnimationFrame( function(){away(i, my)} );
+        else if(r.y <= 51) {r.y = 50;}
+        else if(r.y >= HEIGHT - 51) {r.y = HEIGHT - 50;}
+    }
 
     // handle mouseup events
     function myUp(e){
@@ -186,7 +193,7 @@
           //var dx=mx-startX;
           var dy=my-startY;
 
-          // move each rect that isDragging 
+          // move each rect that isDragging
           // by the distance the mouse has moved
           // since the last mousemove
           for(var i=0;i<rects.length;i++){
